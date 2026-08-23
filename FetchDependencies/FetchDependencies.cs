@@ -5,15 +5,19 @@ namespace FetchDependencies;
 
 public class FetchDependencies
 {
-    private const string VersionUrlGlobal = "https://www.iinact.com/updater/version";
-    private const string VersionUrlChinese = "https://cninact.diemoe.net/CN解析/版本.txt";
-    private const string PluginUrlGlobal = "https://www.iinact.com/updater/download";
-    private const string PluginUrlChinese = "https://cninact.diemoe.net/CN解析/FFXIV_ACT_Plugin.dll";
+    private const string ReleaseMarkerFileName = "FFXIV_ACT_Plugin.release";
+    private const string ReleaseApiUrlGlobal = "https://api.github.com/repos/ravahn/FFXIV_ACT_Plugin/releases/latest";
+    private const string ReleaseApiUrlChinese = "https://api.github.com/repos/NewMoe-Technology/FFXIV_ACT_Plugin_CN/releases/latest";
 
     private Version PluginVersion { get; }
     private string DependenciesDir { get; }
     private bool IsChinese { get; }
     private HttpClient HttpClient { get; }
+
+    private sealed record PluginRelease(string Source, string TagName, string DownloadUrl)
+    {
+        public string Marker => $"{Source}@{TagName}";
+    }
 
     public FetchDependencies(Version version, string assemblyDir, bool isChinese, HttpClient httpClient)
     {
@@ -27,23 +31,29 @@ public class FetchDependencies
     {
         var pluginZipPath = Path.Combine(DependenciesDir, "FFXIV_ACT_Plugin.zip");
         var pluginPath = Path.Combine(DependenciesDir, "FFXIV_ACT_Plugin.dll");
-        
-        if (!NeedsUpdate(pluginPath))
-            return;
-        
-        if (!File.Exists(pluginZipPath))
-        {
-            DownloadPlugin(pluginZipPath);
-        }
-
+        var releaseMarkerPath = Path.Combine(DependenciesDir, ReleaseMarkerFileName);
+        PluginRelease release;
         try
         {
+            release = GetLatestPluginRelease();
+        }
+        catch when (File.Exists(pluginPath))
+        {
+            return;
+        }
+        
+        if (!NeedsUpdate(pluginPath, releaseMarkerPath, release))
+            return;
+        
+        try
+        {
+            DownloadPlugin(release, pluginZipPath);
             ZipFile.ExtractToDirectory(pluginZipPath, DependenciesDir, true);
         }
         catch (InvalidDataException)
         {
             File.Delete(pluginZipPath);
-            DownloadPlugin(pluginZipPath);
+            DownloadPlugin(release, pluginZipPath);
             ZipFile.ExtractToDirectory(pluginZipPath, DependenciesDir, true);
         }
         File.Delete(pluginZipPath);
@@ -55,63 +65,89 @@ public class FetchDependencies
         patcher.MainPlugin();
         patcher.LogFilePlugin();
         patcher.MemoryPlugin();
+        File.WriteAllText(releaseMarkerPath, release.Marker);
     }
 
-    private bool NeedsUpdate(string dllPath)
+    private static bool NeedsUpdate(string dllPath, string releaseMarkerPath, PluginRelease release)
     {
-        if (!File.Exists(dllPath)) return true;
+        if (!File.Exists(dllPath) || !File.Exists(releaseMarkerPath))
+            return true;
+
         try
         {
-            using var plugin = new TargetAssembly(dllPath);
-
-            if (!plugin.ApiVersionMatches())
+            var installedMarker = File.ReadAllText(releaseMarkerPath).Trim();
+            if (!string.Equals(installedMarker, release.Marker, StringComparison.Ordinal))
                 return true;
-            
-            using var cancelAfterDelay = new CancellationTokenSource(TimeSpan.FromSeconds(3));
-            var remoteVersionString = HttpClient
-                                      .GetStringAsync(IsChinese ? VersionUrlChinese : VersionUrlGlobal,
-                                                      cancelAfterDelay.Token).Result;
-            var remoteVersion = new Version(remoteVersionString);
-            return remoteVersion > plugin.Version;
+
+            using var plugin = new TargetAssembly(dllPath);
+            return !plugin.ApiVersionMatches();
         }
         catch
         {
-            return false;
+            return true;
         }
     }
 
-    private void DownloadPlugin(string pluginZipPath)
+    private PluginRelease GetLatestPluginRelease()
     {
-        try
+        var releaseApiUrl = IsChinese ? ReleaseApiUrlChinese : ReleaseApiUrlGlobal;
+        using var request = new HttpRequestMessage(HttpMethod.Get, releaseApiUrl);
+        request.Headers.UserAgent.ParseAdd("IINACT/1.0");
+        using var response = HttpClient.Send(request);
+        response.EnsureSuccessStatusCode();
+
+        using var stream = response.Content.ReadAsStream();
+        var release = JsonNode.Parse(stream);
+        var tagName = release?["tag_name"]?.GetValue<string>();
+        if (string.IsNullOrWhiteSpace(tagName))
+            throw new Exception("GitHub release response did not contain a tag name.");
+
+        var assets = release?["assets"]?.AsArray()
+                     ?? throw new Exception("GitHub release response did not contain any assets.");
+        var archiveName = IsChinese ? "FFXIV_ACT_Plugin.zip" : null;
+        var asset = assets.SingleOrDefault(node =>
         {
-            DownloadFile(IsChinese ? PluginUrlChinese : PluginUrlGlobal, pluginZipPath);
-        }
-        catch
-        {
-            using var request = new HttpRequestMessage(HttpMethod.Get, "https://api.github.com/repos/ravahn/FFXIV_ACT_Plugin/releases/latest");
-            request.Headers.UserAgent.ParseAdd("IINACT/1.0");
-            using var response = HttpClient.Send(request);
-            response.EnsureSuccessStatusCode();
+            var name = node?["name"]?.GetValue<string>();
+            return IsChinese
+                ? string.Equals(name, archiveName, StringComparison.OrdinalIgnoreCase)
+                : name is not null &&
+                  name.StartsWith("FFXIV_ACT_Plugin", StringComparison.OrdinalIgnoreCase) &&
+                  name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase) &&
+                  !name.Contains("sdk", StringComparison.OrdinalIgnoreCase) &&
+                  !name.Contains("cafe", StringComparison.OrdinalIgnoreCase);
+        });
+        var downloadUrl = asset?["browser_download_url"]?.GetValue<string>();
 
-            using var stream = response.Content.ReadAsStream();
-            var json = JsonNode.Parse(stream);
-            var downloadUrl = json?["assets"]?[0]?["browser_download_url"]?.ToString();
+        if (string.IsNullOrEmpty(downloadUrl))
+            throw new Exception("Could not find the FFXIV_ACT_Plugin ZIP asset in the latest GitHub release.");
 
-            if (string.IsNullOrEmpty(downloadUrl))
-                throw new Exception("Could not find fallback download URL from GitHub API.");
+        return new PluginRelease(releaseApiUrl, tagName, downloadUrl);
+    }
 
-            DownloadFile(downloadUrl, pluginZipPath);
-        }
+    private void DownloadPlugin(PluginRelease release, string pluginZipPath)
+    {
+        DownloadFile(release.DownloadUrl, pluginZipPath);
     }
 
     private void DownloadFile(string url, string path)
     {
         using var cancelAfterDelay = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-        using var downloadStream = HttpClient
-                                   .GetStreamAsync(url,
-                                                   cancelAfterDelay.Token).Result;
-        using var zipFileStream = new FileStream(path, FileMode.Create);
-        downloadStream.CopyTo(zipFileStream);
-        zipFileStream.Close();
+        var temporaryPath = path + ".download";
+        try
+        {
+            using var response = HttpClient.GetAsync(url, cancelAfterDelay.Token).Result;
+            response.EnsureSuccessStatusCode();
+            using var downloadStream = response.Content.ReadAsStream(cancelAfterDelay.Token);
+            using (var zipFileStream = new FileStream(temporaryPath, FileMode.Create, FileAccess.Write, FileShare.None))
+            {
+                downloadStream.CopyTo(zipFileStream);
+            }
+            File.Move(temporaryPath, path, true);
+        }
+        finally
+        {
+            if (File.Exists(temporaryPath))
+                File.Delete(temporaryPath);
+        }
     }
 }
