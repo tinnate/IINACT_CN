@@ -1,4 +1,4 @@
-name: IINACT build
+name: IINACT_CN build
 
 on:
   push:
@@ -32,12 +32,12 @@ jobs:
     - name: Prepare Build Artifact
       shell: pwsh
       run: |
-        Copy-Item "IINACT/bin/Release/win-x64/IINACT/latest.zip" -Destination "IINACT.zip"
-        Expand-Archive -Force IINACT.zip Artifact
+        Copy-Item "IINACT/bin/Release/win-x64/IINACT/latest.zip" -Destination "IINACT_CN.zip"
+        Expand-Archive -Force IINACT_CN.zip Artifact
     - name: Upload IINACT
       uses: actions/upload-artifact@v4
       with:
-        name: IINACT
+        name: IINACT_CN
         path: Artifact/*
     - name: Update repo.json if needed
       shell: pwsh
@@ -56,7 +56,7 @@ jobs:
           Write-Output "RELEASE_VERSION=$releaseVersion" >> $env:GITHUB_ENV
         }
 
-        $releaseUrl = 'https://github.com/${{ github.repository }}/releases/download/v' + $releaseVersion + '/IINACT.zip'
+        $releaseUrl = 'https://github.com/${{ github.repository }}/releases/download/v' + $releaseVersion + '/IINACT_CN.zip'
         $repo.AssemblyVersion = $releaseVersion
         $repo.TestingAssemblyVersion = $releaseVersion
         $repo.DownloadLinkInstall = $releaseUrl
@@ -74,8 +74,8 @@ jobs:
       if: ${{ env.RELEASE_VERSION != '0.0.0.0' }}
       uses: softprops/action-gh-release@v1
       with:
-        files: IINACT.zip
-        name: IINACT ${{ env.RELEASE_VERSION }}
+        files: IINACT_CN.zip
+        name: IINACT_CN ${{ env.RELEASE_VERSION }}
         tag_name: v${{ env.RELEASE_VERSION }}
         prerelease: false
         append_body: true
