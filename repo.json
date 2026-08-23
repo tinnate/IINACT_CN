@@ -3,8 +3,8 @@
   "Author": "Moo",
   "Name": "IINACT_CN",
   "InternalName": "IINACT_CN",
-  "AssemblyVersion": "2.10.3.6.1",
-  "TestingAssemblyVersion": "2.10.3.6.1",
+  "AssemblyVersion": "2.10.3.7",
+  "TestingAssemblyVersion": "2.10.3.7",
   "Description": "在现代 .NET 环境中运行 FFXIV_ACT_Plugin 的战斗解析插件，内置深度修改版 OverlayPlugin。",
   "ApplicableVersion": "any",
   "RepoUrl": "https://github.com/tinnate/IINACT_CN",
@@ -19,8 +19,8 @@
   "Punchline": "战斗解析插件。",
   "IsHide": "False",
   "IsTestingExclusive": "False",
-  "DownloadLinkInstall": "https://github.com/tinnate/IINACT_CN/releases/download/v2.10.3.6.1/IINACT_CN.zip",
-  "DownloadLinkTesting": "https://github.com/tinnate/IINACT_CN/releases/download/v2.10.3.6.1/IINACT_CN.zip",
-  "DownloadLinkUpdate": "https://github.com/tinnate/IINACT_CN/releases/download/v2.10.3.6.1/IINACT_CN.zip"
+  "DownloadLinkInstall": "https://github.com/tinnate/IINACT_CN/releases/download/v2.10.3.7/IINACT_CN.zip",
+  "DownloadLinkTesting": "https://github.com/tinnate/IINACT_CN/releases/download/v2.10.3.7/IINACT_CN.zip",
+  "DownloadLinkUpdate": "https://github.com/tinnate/IINACT_CN/releases/download/v2.10.3.7/IINACT_CN.zip"
 }
 ]
