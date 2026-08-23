@@ -19,8 +19,8 @@
   "Punchline": "A parsing plugin.",
   "IsHide": "False",
   "IsTestingExclusive": "False",
-  "DownloadLinkInstall": "https://github.com/tinnate/IINACT_CN/releases/download/v2.10.3.6/IINACT_CN.zip",
-  "DownloadLinkTesting": "https://github.com/tinnate/IINACT_CN/releases/download/v2.10.3.6/IINACT_CN.zip",
-  "DownloadLinkUpdate": "https://github.com/tinnate/IINACT_CN/releases/download/v2.10.3.6/IINACT_CN.zip"
+  "DownloadLinkInstall": "https://github.com/tinnate/IINACT_CN/releases/download/v2.10.3.6/IINACT.zip",
+  "DownloadLinkTesting": "https://github.com/tinnate/IINACT_CN/releases/download/v2.10.3.6/IINACT.zip",
+  "DownloadLinkUpdate": "https://github.com/tinnate/IINACT_CN/releases/download/v2.10.3.6/IINACT.zip"
 }
 ]
