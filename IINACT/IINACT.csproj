@@ -3,7 +3,7 @@
         <Authors>Usagi</Authors>
         <Company>Dezent</Company>
         <AssemblyName>IINACT_CN</AssemblyName>
-        <Version>2.10.3.6</Version>
+        <Version>2.10.3.6.1</Version>
         <Description>A parsing plugin.</Description>
         <Copyright></Copyright>
         <PackageProjectUrl>https://github.com/marzent/IINACT</PackageProjectUrl>

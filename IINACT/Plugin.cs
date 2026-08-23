@@ -16,12 +16,12 @@ namespace IINACT;
 // ReSharper disable once ClassNeverInstantiated.Global
 public sealed class Plugin : IDalamudPlugin
 {
-    public string Name => "IINACT";
+    public string Name => "IINACT_CN";
     public Version Version { get; }
 
     private const string MainWindowCommandName = "/iinact";
     private const string EndEncCommandName = "/endenc";
-    public readonly WindowSystem WindowSystem = new("IINACT");
+    public readonly WindowSystem WindowSystem = new("IINACT_CN");
     
     internal IDalamudPluginInterface PluginInterface { get; }
     internal ICommandManager CommandManager { get; }
@@ -115,12 +115,12 @@ public sealed class Plugin : IDalamudPlugin
 
         CommandManager.AddHandler(MainWindowCommandName, new CommandInfo(OnCommand)
         {
-            HelpMessage = "Displays the IINACT main window"
+            HelpMessage = "显示 IINACT_CN 主窗口"
         });
 
         CommandManager.AddHandler(EndEncCommandName, new CommandInfo(OnCommand)
         {
-            HelpMessage = "Ends the current encounter IINACT is parsing"
+            HelpMessage = "结束 IINACT_CN 当前正在解析的战斗"
         });
 
         PluginInterface.UiBuilder.Draw += DrawUI;

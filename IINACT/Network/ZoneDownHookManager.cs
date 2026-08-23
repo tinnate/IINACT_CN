@@ -152,7 +152,7 @@ public unsafe class ZoneDownHookManager : IDisposable
         notificationManager.AddNotification(new Notification
         {
             Content = content,
-            Title = "IINACT", 
+            Title = "IINACT_CN",
         });
         Plugin.Log.Debug($"[SendNotification] {content}");
     }
@@ -193,7 +193,7 @@ public unsafe class ZoneDownHookManager : IDisposable
         // Compression
         if (header.Compression != CompressionType.None)
         {
-            SendNotification($"A frame was compressed.");
+            SendNotification("检测到已压缩的数据帧。");
             return;
         }
         

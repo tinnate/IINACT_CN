@@ -3,9 +3,9 @@
   "Author": "Moo",
   "Name": "IINACT_CN",
   "InternalName": "IINACT_CN",
-  "AssemblyVersion": "2.10.3.6",
-  "TestingAssemblyVersion": "2.10.3.6",
-  "Description": "A plugin to run the FFXIV_ACT_Plugin in an ACT-like environment with a heavily modified port of Overlay Plugin for modern .NET",
+  "AssemblyVersion": "2.10.3.6.1",
+  "TestingAssemblyVersion": "2.10.3.6.1",
+  "Description": "在现代 .NET 环境中运行 FFXIV_ACT_Plugin 的战斗解析插件，内置深度修改版 OverlayPlugin。",
   "ApplicableVersion": "any",
   "RepoUrl": "https://github.com/tinnate/IINACT_CN",
   "Tags": [
@@ -16,11 +16,11 @@
   "DalamudApiLevel": 15,
   "LoadPriority": 0,
   "IconUrl": "https://raw.githubusercontent.com/tinnate/IINACT_CN/master/images/icon.png",
-  "Punchline": "A parsing plugin.",
+  "Punchline": "战斗解析插件。",
   "IsHide": "False",
   "IsTestingExclusive": "False",
-  "DownloadLinkInstall": "https://github.com/tinnate/IINACT_CN/releases/download/v2.10.3.6/IINACT_CN.zip",
-  "DownloadLinkTesting": "https://github.com/tinnate/IINACT_CN/releases/download/v2.10.3.6/IINACT_CN.zip",
-  "DownloadLinkUpdate": "https://github.com/tinnate/IINACT_CN/releases/download/v2.10.3.6/IINACT_CN.zip"
+  "DownloadLinkInstall": "https://github.com/tinnate/IINACT_CN/releases/download/v2.10.3.6.1/IINACT_CN.zip",
+  "DownloadLinkTesting": "https://github.com/tinnate/IINACT_CN/releases/download/v2.10.3.6.1/IINACT_CN.zip",
+  "DownloadLinkUpdate": "https://github.com/tinnate/IINACT_CN/releases/download/v2.10.3.6.1/IINACT_CN.zip"
 }
 ]
