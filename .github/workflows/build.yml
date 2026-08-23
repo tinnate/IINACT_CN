@@ -32,7 +32,7 @@ jobs:
     - name: Prepare Build Artifact
       shell: pwsh
       run: |
-        Copy-Item "IINACT/bin/Release/win-x64/IINACT/latest.zip" -Destination "IINACT_CN.zip"
+        Copy-Item "IINACT/bin/Release/win-x64/IINACT_CN/latest.zip" -Destination "IINACT_CN.zip"
         Expand-Archive -Force IINACT_CN.zip Artifact
     - name: Upload IINACT
       uses: actions/upload-artifact@v4

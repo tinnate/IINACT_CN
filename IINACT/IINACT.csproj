@@ -2,6 +2,7 @@
     <PropertyGroup>
         <Authors>Usagi</Authors>
         <Company>Dezent</Company>
+        <AssemblyName>IINACT_CN</AssemblyName>
         <Version>2.10.3.6</Version>
         <Description>A parsing plugin.</Description>
         <Copyright></Copyright>
