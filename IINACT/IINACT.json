@@ -1,15 +1,15 @@
 {
-    "Author": "Usagi",
-    "Name": "IINACT",
+    "Author": "Moo",
+    "Name": "IINACT_CN",
     "Punchline": "A parsing plugin.",
-    "RepoUrl": "https://github.com/marzent/IINACT",
+    "RepoUrl": "https://github.com/tinnate/IINACT_CN",
     "Description": "A plugin to run the FFXIV_ACT_Plugin in an ACT-like environment with a heavily modified port of Overlay Plugin for modern .NET",
-    "InternalName": "IINACT",
+    "InternalName": "IINACT_CN",
     "ApplicableVersion": "2026.08.11.0000.0000",
     "Tags": [
         "parsing",
         "plugin",
         "ACT"
     ],
-    "IconUrl": "https://raw.githubusercontent.com/marzent/IINACT/master/images/icon.png"
+    "IconUrl": "https://raw.githubusercontent.com/tinnate/IINACT_CN/master/images/icon.png"
 }
