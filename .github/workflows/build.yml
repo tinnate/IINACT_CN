@@ -4,6 +4,9 @@ on:
   push:
     branches: [ "main" ]
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -39,17 +42,34 @@ jobs:
     - name: Update repo.json if needed
       shell: pwsh
       run: |
-        $repo = Get-Content 'repo.json' -raw | ConvertFrom-Json
+        $repoJsonPath = 'repo.json'
+        $repoJson = Get-Content $repoJsonPath -Raw
+        $repo = $repoJson | ConvertFrom-Json
         $build = Get-Content 'IINACT/bin/Release/win-x64/IINACT/IINACT.json' -raw | ConvertFrom-Json
-        if ($repo.AssemblyVersion -eq $build.AssemblyVersion) {
+        $releaseVersion = $build.AssemblyVersion
+        if ([string]::IsNullOrWhiteSpace($releaseVersion)) {
+          throw 'The build manifest does not contain an AssemblyVersion.'
+        }
+        Write-Output "REPO_JSON_VERSION=$releaseVersion" >> $env:GITHUB_ENV
+
+        if ($repo.AssemblyVersion -ne $releaseVersion) {
+          Write-Output "RELEASE_VERSION=$releaseVersion" >> $env:GITHUB_ENV
+        }
+
+        $releaseUrl = 'https://github.com/${{ github.repository }}/releases/download/v' + $releaseVersion + '/IINACT.zip'
+        $repo.AssemblyVersion = $releaseVersion
+        $repo.TestingAssemblyVersion = $releaseVersion
+        $repo.DownloadLinkInstall = $releaseUrl
+        $repo.DownloadLinkTesting = $releaseUrl
+        $repo.DownloadLinkUpdate = $repo.DownloadLinkInstall
+
+        $updatedRepoJson = $repo | ConvertTo-Json -Depth 10 | ForEach-Object { "[`n" + $_ + "`n]" }
+        if ($repoJson -eq $updatedRepoJson) {
           Exit
         }
-        Write-Output "RELEASE_VERSION=$($build.AssemblyVersion)" >> $env:GITHUB_ENV
-        $repo.AssemblyVersion = $repo.TestingAssemblyVersion = $build.AssemblyVersion
-        $repo.DownloadLinkInstall = 'https://github.com/marzent/IINACT/releases/download/v' + $repo.AssemblyVersion + '/IINACT.zip'
-        $repo.DownloadLinkTesting =  'https://github.com/marzent/IINACT/releases/download/v' + $repo.TestingAssemblyVersion + '/IINACT.zip'
-        $repo.DownloadLinkUpdate = $repo.DownloadLinkInstall
-        $repo | ConvertTo-Json | % { "[`n" + $_ + "`n]" } | Set-Content 'repo.json'
+
+        $updatedRepoJson | Set-Content $repoJsonPath -Encoding utf8 -NoNewline
+        Write-Output 'REPO_JSON_CHANGED=true' >> $env:GITHUB_ENV
     - name: Create Release
       if: ${{ env.RELEASE_VERSION != '0.0.0.0' }}
       uses: softprops/action-gh-release@v1
@@ -63,15 +83,14 @@ jobs:
         generate_release_notes: true
         fail_on_unmatched_files: true
     - name: Commit repo.json
-      if: ${{ env.RELEASE_VERSION != '0.0.0.0' }}
+      if: ${{ env.REPO_JSON_CHANGED == 'true' }}
       run: |
-        git config --global user.name "Actions User"
-        git config --global user.email "actions@github.com"
-        git fetch origin main
-        git checkout main
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
         git add repo.json
-        git commit -m "[CI] updating repo.json for ${{ env.RELEASE_VERSION }}" || true
-        git push origin main   
+        git diff --cached --quiet && exit 0
+        git commit -m "[CI] updating repo.json for ${{ env.REPO_JSON_VERSION }}"
+        git push
     
     
 
