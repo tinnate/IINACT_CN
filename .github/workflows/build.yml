@@ -3,6 +3,13 @@ name: IINACT_CN build
 on:
   push:
     branches: [ "main" ]
+  workflow_dispatch:
+    inputs:
+      force_release:
+        description: '强制发布当前构建版本（会更新同标签的 Release 资源）'
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: write
@@ -40,6 +47,8 @@ jobs:
         name: IINACT_CN
         path: Artifact/*
     - name: Update repo.json if needed
+      env:
+        GH_TOKEN: ${{ github.token }}
       shell: pwsh
       run: |
         $repoJsonPath = 'repo.json'
@@ -52,7 +61,12 @@ jobs:
         }
         Write-Output "REPO_JSON_VERSION=$releaseVersion" >> $env:GITHUB_ENV
 
-        if ($repo.AssemblyVersion -ne $releaseVersion) {
+        # repo.json 可能已提前更新，但相应的 GitHub Release 尚未创建。
+        # 以实际 Release 标签为准，避免误跳过发布步骤。
+        gh release view "v$releaseVersion" --repo "${{ github.repository }}" 2>$null
+        $releaseExists = $LASTEXITCODE -eq 0
+        $forceRelease = '${{ inputs.force_release }}' -eq 'true'
+        if ($forceRelease -or $repo.AssemblyVersion -ne $releaseVersion -or -not $releaseExists) {
           Write-Output "RELEASE_VERSION=$releaseVersion" >> $env:GITHUB_ENV
         }
 
@@ -81,6 +95,7 @@ jobs:
         append_body: true
         body_path: .github/release-notices.md
         generate_release_notes: true
+        overwrite_files: true
         fail_on_unmatched_files: true
     - name: Commit repo.json
       if: ${{ env.REPO_JSON_CHANGED == 'true' }}
