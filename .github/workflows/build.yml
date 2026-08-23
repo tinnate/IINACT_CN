@@ -45,7 +45,7 @@ jobs:
         $repoJsonPath = 'repo.json'
         $repoJson = Get-Content $repoJsonPath -Raw
         $repo = $repoJson | ConvertFrom-Json
-        $build = Get-Content 'IINACT/bin/Release/win-x64/IINACT/IINACT.json' -raw | ConvertFrom-Json
+        $build = Get-Content 'IINACT/bin/Release/win-x64/IINACT_CN/IINACT_CN.json' -raw | ConvertFrom-Json
         $releaseVersion = $build.AssemblyVersion
         if ([string]::IsNullOrWhiteSpace($releaseVersion)) {
           throw 'The build manifest does not contain an AssemblyVersion.'
