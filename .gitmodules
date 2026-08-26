@@ -3,4 +3,4 @@
 	url = git@github.com:tinnate/machina.git
 [submodule "OverlayPlugin.Core/resources/act-overlays"]
 	path = OverlayPlugin.Core/resources/act-overlays
-	url = https://github.com/cking/act-overlays
+	url = git@github.com:tinnate/act-overlays
